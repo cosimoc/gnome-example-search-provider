@@ -1,0 +1,10 @@
+[Desktop Entry]
+_Name=Example
+_Comment=Example application
+Exec=gnome-search-example
+Icon=preferences-desktop-theme
+Terminal=false
+Type=Application
+StartupNotify=true
+OnlyShowIn=GNOME;
+Categories=GNOME;GTK;Utility;Core;
