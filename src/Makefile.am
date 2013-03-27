@@ -37,6 +37,13 @@ desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 searchproviderdir = $(datadir)/gnome-shell/search-providers
 searchprovider_DATA = search-example-provider.ini
 
+servicedir = $(datadir)/dbus-1/services
+service_DATA = $(service_in_files:.service.in=.service)
+service_in_files = org.gnome.SearchExample.SearchProvider.service.in
+
+org.gnome.SearchExample.SearchProvider.service: org.gnome.SearchExample.SearchProvider.service.in Makefile
+	$(AM_V_GEN) sed -e "s|\@bindir\@|$(bindir)|" $< > $@
+
 CLEANFILES = \
 	$(desktop_in_files) \
 	$(desktop_DATA) \

@@ -28,6 +28,51 @@ GType search_example_provider_app_get_type (void);
 
 G_DEFINE_TYPE (SearchExampleProviderApp, search_example_provider_app, G_TYPE_APPLICATION)
 
+static GVariant *
+get_result_set (void)
+{
+  GVariantBuilder builder;
+
+  g_variant_builder_init (&builder, G_VARIANT_TYPE ("as"));
+  g_variant_builder_add (&builder, "s", "result1");
+  g_variant_builder_add (&builder, "s", "result2");
+
+  return g_variant_new ("(as)", &builder);
+}
+
+static GVariant *
+get_result_metas (const gchar **results)
+{
+  gint idx;
+  GIcon *gicon = g_themed_icon_new ("text-x-generic");
+  const gchar *name_format = "Result %d";
+  gchar *name, *gicon_str;
+  GVariantBuilder meta, metas;
+
+  g_variant_builder_init (&metas, G_VARIANT_TYPE ("aa{sv}"));
+
+  for (idx = 0; results[idx] != NULL; idx++)
+    {
+      g_variant_builder_init (&meta, G_VARIANT_TYPE ("a{sv}"));
+      g_variant_builder_add (&meta, "{sv}",
+                             "id", g_variant_new_string (results[idx]));
+
+      name = g_strdup_printf (name_format, idx);
+      g_variant_builder_add (&meta, "{sv}",
+                             "name", g_variant_new_string (name));
+      g_free (name);
+
+      gicon_str = g_icon_to_string (gicon);
+      g_variant_builder_add (&meta, "{sv}",
+                             "gicon", g_variant_new_string (gicon_str));
+      g_free (gicon_str);
+
+      g_variant_builder_add_value (&metas, g_variant_builder_end (&meta));
+    }
+
+  return g_variant_new ("(aa{sv})", &metas);
+}
+
 static void
 handle_get_initial_result_set (SearchExampleShellSearchProvider2  *skeleton,
                                GDBusMethodInvocation              *invocation,
@@ -39,8 +84,7 @@ handle_get_initial_result_set (SearchExampleShellSearchProvider2  *skeleton,
   g_print ("****** GetInitialResultSet() called with %s\n", joined_terms);
   g_free (joined_terms);
 
-  g_dbus_method_invocation_return_value (invocation,
-                                         g_variant_new ("(as)", NULL));
+  g_dbus_method_invocation_return_value (invocation, get_result_set ());
 }
 
 static void
@@ -55,8 +99,7 @@ handle_get_subsearch_result_set (SearchExampleShellSearchProvider2  *skeleton,
   g_print ("****** GetSubSearchResultSet() called with %s\n", joined_terms);
   g_free (joined_terms);
 
-  g_dbus_method_invocation_return_value (invocation,
-                                         g_variant_new ("(as)", NULL));
+  g_dbus_method_invocation_return_value (invocation, get_result_set ());
 }
 
 static void
@@ -74,8 +117,7 @@ handle_get_result_metas (SearchExampleShellSearchProvider2  *skeleton,
 
   g_print ("\n");
 
-  g_dbus_method_invocation_return_value (invocation,
-                                         g_variant_new ("(aa{sv})", NULL));
+  g_dbus_method_invocation_return_value (invocation, get_result_metas ((const gchar **) results));
 }
 
 static void
